@@ -59,6 +59,19 @@ Next steps (optional)
 - Add OpenAPI and Swagger UI for API exploration.
 - Add a JSON response DTO and example client code.
 
+## Base path and codename
+
+This project exposes all HTTP endpoints under a configurable root path. The current codename and base path are set in `src/main/resources/application.properties`:
+
+- `project.codename=circe`
+- `quarkus.http.root-path=/circe`
+
+With these settings, the test endpoint is available at:
+
+http://localhost:8081/circe/hello
+
+(If you change `quarkus.http.port` or `quarkus.http.root-path`, update the URL accordingly.)
+
 ---
 
 `/hello` quickcheck
