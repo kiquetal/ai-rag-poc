@@ -1,0 +1,5 @@
+### Test the embedding endpoint
+POST http://localhost:8082/caton/embed
+Content-Type: text/plain
+
+Hello, world! This is a test to generate an embedding.

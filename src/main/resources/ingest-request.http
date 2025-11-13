@@ -1,0 +1,7 @@
+### Ingest a new document
+POST http://localhost:8082/caton/documents
+Content-Type: text/plain
+
+LangChain4j is a powerful and versatile open-source Java library designed to streamline the development of applications powered by Large Language Models (LLMs).
+It provides a comprehensive set of tools and abstractions that simplify the process of creating sophisticated AI applications, from simple chatbots to complex, multi-step conversational agents.
+The library is inspired by the popular Python library LangChain and aims to bring the same level of functionality and ease of use to the Java ecosystem.
