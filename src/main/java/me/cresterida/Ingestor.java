@@ -11,7 +11,10 @@ import io.quarkus.infinispan.client.Remote;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.commons.api.query.Query;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -23,22 +26,13 @@ public class Ingestor {
     @Inject
     EmbeddingModel embeddingModel;
 
-    /**
-     * A dedicated cache to store and track the IDs of ingested documents.
-     * This provides a reliable way to count unique documents.
-     */
     @Inject
     @Remote("document-ids")
-    RemoteCache<String, String> documentIdsCache;
+    RemoteCache<String, DocumentInfo> documentIdsCache;
 
-    public void ingest(String text) {
-        // 1. Create a unique ID for the new document first.
+    public void ingest(String title, String text) {
         String docId = UUID.randomUUID().toString();
-
-        // 2. Create the Metadata object using the correct static factory method.
         Metadata metadata = Metadata.from("document_id", docId);
-
-        // 3. Create the Document using the correct static factory method.
         Document document = Document.from(text, metadata);
 
         EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
@@ -49,16 +43,21 @@ public class Ingestor {
 
         ingestor.ingest(document);
 
-        // 4. Store the ID we created in our tracking cache.
-        documentIdsCache.put(docId, docId);
+        documentIdsCache.put(docId, new DocumentInfo(docId, title));
     }
 
-    /**
-     * Retrieves the total number of unique documents that have been ingested.
-     *
-     * @return The total number of unique documents.
-     */
     public long getDocumentCount() {
         return documentIdsCache.size();
+    }
+
+    public List<DocumentInfo> searchByTitle(String searchTerm) {
+        if (searchTerm == null || searchTerm.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        // Correctly use the .query() method directly on the RemoteCache.
+        Query<DocumentInfo> query = documentIdsCache.query("FROM me.cresterida.DocumentInfo WHERE title LIKE :searchTerm");
+        query.setParameter("searchTerm", "%" + searchTerm + "%");
+        return query.list();
     }
 }
