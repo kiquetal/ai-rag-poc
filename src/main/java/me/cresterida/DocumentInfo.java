@@ -5,7 +5,8 @@ import org.infinispan.api.annotations.indexing.Indexed;
 
 /**
  * A class representing indexed document metadata.
- * This object is stored in the 'document-ids' cache.
+ * This object is stored as the VALUE in the 'document-ids' cache.
+ * The KEY for the cache entry is the 'docId' string itself.
  */
 @Indexed
 public class DocumentInfo {
@@ -18,13 +19,20 @@ public class DocumentInfo {
         this.title = title;
     }
 
-    // The docId will be the primary key, but we make it searchable as well.
+    /**
+     * The unique ID of the document.
+     * This field is also used as the KEY for the entry in the Infinispan cache.
+     * Making it projectable and sortable allows for efficient queries.
+     */
     @Basic(projectable = true, sortable = true)
     public String getDocId() {
         return docId;
     }
 
-    // The title of the document, which we can use for full-text search.
+    /**
+     * The title of the document.
+     * This field is indexed for searching.
+     */
     @Basic(projectable = true, sortable = true)
     public String getTitle() {
         return title;
