@@ -68,3 +68,25 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+  deploy-to-github:
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: write
+    steps:
+      - name: Create GitHub Deployment
+        uses: actions/create-deployment@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: development
+          ref: ${{ github.sha }}
+          description: "Deploying Docker image to development environment"
+
+      - name: Set deployment status to success
+        uses: actions/deployment-status@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: development
+          state: success
+          description: "Deployment completed successfully"
