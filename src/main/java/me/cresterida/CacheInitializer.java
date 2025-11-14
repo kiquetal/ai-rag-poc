@@ -25,7 +25,11 @@ public class CacheInitializer {
         // This is the same logic from the properties file, but now in Java.
         String cacheConfigXml = "<distributed-cache name=\"" + cacheName + "\">" +
                 "<encoding media-type=\"application/x-protostream\"/>" +
-                "<indexing enabled=\"true\" storage=\"local-heap\"/>" +
+                "<indexing enabled=\"true\" storage=\"local-heap\">" +
+                "<indexed-entities>" +
+                "\"<indexed-entity>me.cresterida.DocumentInfo</indexed-entity>\"" +
+                "</indexed-entities>" +
+                "</indexing>" +
                 "</distributed-cache>";
 
         // 2. Use the administration API to create (or get) the cache
