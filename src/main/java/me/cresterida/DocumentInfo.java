@@ -2,39 +2,28 @@ package me.cresterida;
 
 import org.infinispan.api.annotations.indexing.Basic;
 import org.infinispan.api.annotations.indexing.Indexed;
+import org.infinispan.api.annotations.indexing.Text;
+import org.infinispan.protostream.annotations.Proto;
+import org.infinispan.protostream.annotations.ProtoFactory;
+import org.infinispan.protostream.annotations.ProtoField;
 
 /**
  * A class representing indexed document metadata.
  * This object is stored as the VALUE in the 'document-ids' cache.
  * The KEY for the cache entry is the 'docId' string itself.
+ *
+ * The @Proto annotations are required to automatically generate
+ * the marshaller that converts this object to/from the Protobuf format
+ * used by the remote Infinispan server.
  */
 @Indexed
-public class DocumentInfo {
+@Proto
+public record DocumentInfo(
+        @Text
+        String docId,
+        @Text
+           String title){
 
-    private final String docId;
-    private final String title;
-
-    public DocumentInfo(String docId, String title) {
-        this.docId = docId;
-        this.title = title;
-    }
-
-    /**
-     * The unique ID of the document.
-     * This field is also used as the KEY for the entry in the Infinispan cache.
-     * Making it projectable and sortable allows for efficient queries.
-     */
-    @Basic(projectable = true, sortable = true)
-    public String getDocId() {
-        return docId;
-    }
-
-    /**
-     * The title of the document.
-     * This field is indexed for searching.
-     */
-    @Basic(projectable = true, sortable = true)
-    public String getTitle() {
-        return title;
-    }
 }
+
+
