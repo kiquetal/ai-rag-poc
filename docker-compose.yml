@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: src/main/docker/Dockerfile.jvm
+    image: ghcr.io/cresterida/ai-rag-poc:latest
     ports:
       - "8080:8080"
     environment:
