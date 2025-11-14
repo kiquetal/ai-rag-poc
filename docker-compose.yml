@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.jvm
+    ports:
+      - "8080:8080"
+    environment:
+      - QUARKUS_INFINISPAN_CLIENT_HOSTS=infinispan:11222
+    depends_on:
+      - infinispan
+
+  infinispan:
+    image: infinispan/server:15.1
+    ports:
+      - "11222:11222"
+    environment:
+      - USER=admin
+      - PASS=password
