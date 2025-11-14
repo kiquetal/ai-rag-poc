@@ -4,39 +4,44 @@ import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.configuration.StringConfiguration;
+// We inject your generated schema
+import me.cresterida.DocumentInfoSchema;
+import org.infinispan.query.remote.client.ProtobufMetadataManagerConstants;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class CacheInitializer {
 
-    @Inject
-    RemoteCacheManager remoteCacheManager; // Inject the main cache manager
+    private static final Logger LOGGER = Logger.getLogger(CacheInitializer.class);
 
-    /**
-     * This method is automatically called by Quarkus when the application starts.
-     * It ensures our cache is created with the correct configuration.
-     */
+    @Inject
+    RemoteCacheManager remoteCacheManager;
+
+
     void onStart(@Observes StartupEvent ev)
     {
-        String cacheName = "document-ids";
+        LOGGER.info("Starting manual schema registration...");
 
-        // 1. Define the cache configuration as an XML string.
-        // This is the same logic from the properties file, but now in Java.
+
+
+        // 2. Get the special cache for storing protobuf schemas
+        String cacheName = "document-ids";
         String cacheConfigXml = "<distributed-cache name=\"" + cacheName + "\">" +
                 "<encoding media-type=\"application/x-protostream\"/>" +
                 "<indexing enabled=\"true\" storage=\"local-heap\">" +
-                "<indexed-entities>" +
-                "\"<indexed-entity>me.cresterida.DocumentInfo</indexed-entity>\"" +
-                "</indexed-entities>" +
+                "    <indexed-entities>" +
+                "        <indexed-entity>me.cresterida.DocumentInfo</indexed-entity>" +
+                "    </indexed-entities>" +
                 "</indexing>" +
                 "</distributed-cache>";
 
-        // 2. Use the administration API to create (or get) the cache
-        // with this specific configuration.
-        // This is an idempotent call, so it's safe to run every time.
+        LOGGER.info("Creating cache '" + cacheName + "'...");
         remoteCacheManager.administration()
                 .getOrCreateCache(cacheName, new StringConfiguration(cacheConfigXml));
 
+        LOGGER.info("Cache '" + cacheName + "' created successfully.");
     }
 }

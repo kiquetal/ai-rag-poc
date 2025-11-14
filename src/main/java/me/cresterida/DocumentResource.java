@@ -39,7 +39,7 @@ public class DocumentResource {
     @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DocumentInfo> search(@QueryParam("title") String title) {
-        return ingestor.searchByTitle(title);
+    public List<DocumentInfo> search(@QueryParam("term") String term) {
+        return ingestor.searchByTitleOrContent(term);
     }
 }

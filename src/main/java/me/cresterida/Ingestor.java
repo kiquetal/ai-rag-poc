@@ -11,6 +11,7 @@ import io.quarkus.infinispan.client.Remote;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.api.query.Query;
 
 import java.util.Collections;
@@ -30,6 +31,8 @@ public class Ingestor {
     @Remote("document-ids")
     RemoteCache<String, DocumentInfo> documentIdsCache;
 
+    @Inject
+    RemoteCacheManager remoteCacheManager; // Inject the main cache manager
     public void ingest(String title, String text) {
         String docId = UUID.randomUUID().toString();
         Metadata metadata = Metadata.from("document_id", docId);
@@ -43,21 +46,33 @@ public class Ingestor {
 
         ingestor.ingest(document);
 
+
+
         documentIdsCache.put(docId, new DocumentInfo(docId, title));
     }
 
     public long getDocumentCount() {
+        var documentIdsCache = remoteCacheManager.getCache("document-ids");
+
         return documentIdsCache.size();
     }
 
-    public List<DocumentInfo> searchByTitle(String searchTerm) {
+    public List<DocumentInfo> searchByTitleOrContent(String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
             return Collections.emptyList();
         }
 
-        // Correctly use the .query() method directly on the RemoteCache.
-        Query<DocumentInfo> query = documentIdsCache.query("FROM me.cresterida.DocumentInfo WHERE title LIKE :searchTerm");
-        query.setParameter("searchTerm", "%" + searchTerm + "%");
+        // Get the cache
+        RemoteCache<String, DocumentInfo> documentIdsCache = remoteCacheManager.getCache("document-ids");
+
+        // The query is updated to check both 'title' AND 'content'
+        String queryString = "FROM me.cresterida.DocumentInfo WHERE title : :searchTerm OR content : :searchTerm";
+
+        Query<DocumentInfo> query = documentIdsCache.query(queryString);
+
+        // Set the parameter. It's used for all occurrences of ':searchTerm'
+        query.setParameter("searchTerm", searchTerm);
+
         return query.list();
     }
 }
