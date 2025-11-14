@@ -12,5 +12,5 @@ Content-Type: application/json
 GET http://localhost:8082/caton/documents/count
 
 ###
-### Search for documents by title
+### Search for documents by content
 GET http://localhost:8082/caton/documents/search?term=llm

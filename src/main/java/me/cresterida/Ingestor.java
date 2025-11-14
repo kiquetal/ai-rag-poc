@@ -90,7 +90,7 @@ public class Ingestor {
                         .build()).matches();
 
         // 3. Extract the segments from the matches
-        return relevantMatches.stream()
+        List<CombinedSearchResult> partialList =  relevantMatches.stream()
                 .map(match -> {
                     // Get the segment and its score
                     TextSegment segment = match.embedded();
@@ -107,6 +107,14 @@ public class Ingestor {
                     return new CombinedSearchResult(score, segment.text(), docId, title);
                 })
                 .toList();
+
+        // Just
+
+        partialList = partialList.stream().distinct().toList();
+
+        return partialList;
+
+
 
 
     }
