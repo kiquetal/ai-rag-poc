@@ -1,5 +1,6 @@
 package me.cresterida;
 
+import dev.langchain4j.data.segment.TextSegment;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -39,7 +40,7 @@ public class DocumentResource {
     @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DocumentInfo> search(@QueryParam("term") String term) {
-        return ingestor.searchByTitleOrContent(term);
+    public List<Ingestor.CombinedSearchResult> search(@QueryParam("term") String term) {
+        return ingestor.findSimilarContent(term);
     }
 }

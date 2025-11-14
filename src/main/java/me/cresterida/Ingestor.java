@@ -3,8 +3,11 @@ package me.cresterida;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.document.splitter.DocumentSplitters;
+import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.store.embedding.EmbeddingMatch;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import io.quarkus.infinispan.client.Remote;
@@ -57,7 +60,7 @@ public class Ingestor {
         return documentIdsCache.size();
     }
 
-    public List<DocumentInfo> searchByTitleOrContent(String searchTerm) {
+    public List<DocumentInfo> searchByDocumentTitle(String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
             return Collections.emptyList();
         }
@@ -66,13 +69,51 @@ public class Ingestor {
         RemoteCache<String, DocumentInfo> documentIdsCache = remoteCacheManager.getCache("document-ids");
 
         // The query is updated to check both 'title' AND 'content'
-        String queryString = "FROM me.cresterida.DocumentInfo WHERE title : :searchTerm OR content : :searchTerm";
+        String queryString = "FROM me.cresterida.DocumentInfo WHERE title : :searchTerm";
 
         Query<DocumentInfo> query = documentIdsCache.query(queryString);
 
-        // Set the parameter. It's used for all occurrences of ':searchTerm'
+
         query.setParameter("searchTerm", searchTerm);
 
         return query.list();
     }
+    public List<CombinedSearchResult> findSimilarContent(String searchTerm) {
+
+        // 1. Convert the user's search term into a vector
+        Embedding searchTermEmbedding = embeddingModel.embed(searchTerm).content();
+
+        List<EmbeddingMatch<TextSegment>> relevantMatches = embeddingStore.search(
+                EmbeddingSearchRequest.builder()
+                        .queryEmbedding(searchTermEmbedding)
+                        .maxResults(10)
+                        .build()).matches();
+
+        // 3. Extract the segments from the matches
+        return relevantMatches.stream()
+                .map(match -> {
+                    // Get the segment and its score
+                    TextSegment segment = match.embedded();
+                    double score = match.score();
+
+                    // Get the document_id from the segment's metadata
+                    String docId = segment.metadata().getString("document_id");
+
+                    // NOW, use the docId to get the title from our *other* cache
+                    DocumentInfo docInfo = documentIdsCache.get(docId);
+                    String title = (docInfo != null) ? docInfo.title() : "Unknown Title";
+
+                    // Create our nice, clean result object
+                    return new CombinedSearchResult(score, segment.text(), docId, title);
+                })
+                .toList();
+
+
+    }
+    public record CombinedSearchResult(
+            double score,
+            String text,
+            String documentId,
+            String title
+    ) {}
 }

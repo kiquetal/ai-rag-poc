@@ -13,4 +13,4 @@ GET http://localhost:8082/caton/documents/count
 
 ###
 ### Search for documents by title
-GET http://localhost:8082/caton/documents/search?term=bring
+GET http://localhost:8082/caton/documents/search?term=llm
