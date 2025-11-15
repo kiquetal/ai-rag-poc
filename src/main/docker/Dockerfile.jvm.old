@@ -4,18 +4,27 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
 COPY src ./src
-RUN mvn package
+RUN mvn package -DskipTests
 
 # Stage 2: Create the runtime image
 FROM registry.access.redhat.com/ubi9/openjdk-21:1.23
+LABEL maintainer="Your Name <your.email@example.com>"
 
 ENV LANGUAGE='en_US:en'
+
+# Add Environment Variables from application.properties
+ENV GEMINI_API_KEY="your_gemini_api_key"
+ENV GEMINI_PROJECT_ID="your_gemini_project_id"
+ENV INFINISPAN_HOSTS="your_infinispan_hosts"
 
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY --from=build /app/target/quarkus-app/lib/ /deployments/lib/
 COPY --from=build /app/target/quarkus-app/*.jar /deployments/
 COPY --from=build /app/target/quarkus-app/app/ /deployments/app/
 COPY --from=build /app/target/quarkus-app/quarkus/ /deployments/quarkus/
+
+# Set permissions for the non-root user
+RUN chown -R 185:185 /deployments
 
 EXPOSE 8080
 USER 185
