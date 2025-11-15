@@ -1,7 +1,9 @@
 name: Development Build and Deploy
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 env:
   IMAGE_NAME: ${{ github.repository }}
@@ -83,7 +85,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: src/main/docker/Dockerfile.jvm
+          file: src/main/docker/Dockerfile.jvm.nobuild
           platforms: linux/${{ matrix.platform }}
           push: true
           tags: ${{ steps.generate_tag.outputs.tag }}
@@ -135,3 +137,4 @@ jobs:
         uses: actions/create-deployment@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
