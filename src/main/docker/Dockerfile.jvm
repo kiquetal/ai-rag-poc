@@ -24,6 +24,7 @@ COPY --from=build /app/target/quarkus-app/app/ /deployments/app/
 COPY --from=build /app/target/quarkus-app/quarkus/ /deployments/quarkus/
 
 # Set permissions for the non-root user
+USER root
 RUN chown -R 185:185 /deployments
 
 EXPOSE 8080
