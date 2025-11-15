@@ -9,7 +9,20 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      timestamp_rfc3339: ${{ steps.time.outputs.date_rfc3339 }}
+      timestamp_tag: ${{ steps.time.outputs.date_tag }}
+    steps:
+      - name: Get current time
+        id: time
+        run: |
+          echo "date_rfc3339=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+          echo "date_tag=$(date -u +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+
   build-and-push-image:
+    needs: prepare
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -58,13 +71,13 @@ jobs:
           images: ghcr.io/${{ env.IMAGE_NAME }}
           labels: |
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
-            org.opencontainers.image.created=${{ time 'YYYY-MM-DDTHH:mm:ssZ' }}
+            org.opencontainers.image.created=${{ needs.prepare.outputs.timestamp_rfc3339 }}
             org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Generate architecture-specific tag
         id: generate_tag
         run: |
-          DATE=$(date +%Y%m%d)
+          DATE=${{ needs.prepare.outputs.timestamp_tag }}
           TAG="ghcr.io/${{ env.IMAGE_NAME }}:${DATE}-${{ matrix.platform }}"
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
@@ -79,7 +92,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   create-manifest-list:
-    needs: build-and-push-image
+    needs: [build-and-push-image, prepare]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -103,7 +116,7 @@ jobs:
 
       - name: Create and push manifest list
         run: |
-          DATE=$(date +%Y%m%d)
+          DATE=${{ needs.prepare.outputs.timestamp_tag }}
           MANIFEST_TAG="ghcr.io/${{ env.IMAGE_NAME }}:${DATE}"
           AMD64_TAG="ghcr.io/${{ env.IMAGE_NAME }}:${DATE}-amd64"
           ARM64_TAG="ghcr.io/${{ env.IMAGE_NAME }}:${DATE}-arm64"
@@ -124,4 +137,3 @@ jobs:
         uses: actions/create-deployment@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
