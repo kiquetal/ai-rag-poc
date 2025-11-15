@@ -12,6 +12,11 @@ LABEL maintainer="Your Name <your.email@example.com>"
 
 ENV LANGUAGE='en_US:en'
 
+# Add Environment Variables from application.properties
+ENV GEMINI_API_KEY="your_gemini_api_key"
+ENV GEMINI_PROJECT_ID="your_gemini_project_id"
+ENV INFINISPAN_HOSTS="your_infinispan_hosts"
+
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY --from=build /app/target/quarkus-app/lib/ /deployments/lib/
 COPY --from=build /app/target/quarkus-app/*.jar /deployments/
