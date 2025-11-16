@@ -1,12 +1,14 @@
 services:
   app:
-    image: ghcr.io/cresterida/ai-rag-poc:latest
+    image: ghcr.io/kiquetal/ai-rag-poc:20251115021258-amd64
     ports:
       - "8082:8082"
     environment:
       - INFINISPAN_HOSTS=infinispan:11222
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - GEMINI_PROJECT_ID=${GEMINI_PROJECT_ID}
+      - INFINISPAN_USER=admin
+      - INFINISPAN_PASS=password
     depends_on:
       - infinispan
     networks:
