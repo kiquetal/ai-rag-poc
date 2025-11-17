@@ -50,6 +50,27 @@ This document outlines the next steps to evolve this project from a retrieval se
 
 The current system retrieves relevant context. This phase adds the "Generation" component to provide a synthesized, natural language answer.
 
+### RAG Flow Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant ChatEndpoint as "/chat Endpoint"
+    participant Ingestor as "Ingestor Service"
+    participant EmbeddingStore as "Embedding Store (Infinispan)"
+    participant ChatLanguageModel as "Chat Language Model (LLM)"
+
+    User->>+ChatEndpoint: POST /chat (query)
+    ChatEndpoint->>+Ingestor: findSimilarContent(query)
+    Ingestor->>+EmbeddingStore: Search for similar vectors
+    EmbeddingStore-->>-Ingestor: Return relevant text chunks
+    Ingestor-->>-ChatEndpoint: Return relevant text chunks
+    ChatEndpoint->>ChatEndpoint: Augment: Combine chunks into context
+    ChatEndpoint->>+ChatLanguageModel: generate("system prompt + context + query")
+    ChatLanguageModel-->>-ChatEndpoint: LLM Response
+    ChatEndpoint-->>-User: Return LLM Response
+```
+
 ### [ ] Integrate a Chat Language Model
 - Add the `quarkus-langchain4j-openai` dependency.
 - Inject `ChatLanguageModel` or `StreamingChatLanguageModel`.
