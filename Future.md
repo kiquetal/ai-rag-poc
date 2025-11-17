@@ -1,5 +1,47 @@
 # Project Roadmap: From Retrieval to Production RAG
 
+```ascii
++---------------------------------------------------------------------------------+
+|                               Project Roadmap                                   |
++---------------------------------------------------------------------------------+
+|                                                                                 |
+|   +---------------------------------------------------------------------------+ |
+|   | Phase 1: Implement the Full RAG Pattern                                   | |
+|   |---------------------------------------------------------------------------| |
+|   | - Integrate Chat Language Model                                           | |
+|   | - Use Podman AI Lab for Local Testing                                     | |
+|   | - Create a RAG "Chat" Endpoint                                            | |
+|   | - (Senior) Implement Streaming Responses                                  | |
+|   +---------------------------------------------------------------------------+ |
+|                                       |                                         |
+|                                       v                                         |
+|   +---------------------------------------------------------------------------+ |
+|   | Phase 2: Build a Resilient, Asynchronous Ingestion System                 | |
+|   |---------------------------------------------------------------------------| |
+|   | - Create an Asynchronous Ingestion Endpoint (Kafka/RabbitMQ)              | |
+|   | - Build an Ingestion Service (@Incoming)                                  | |
+|   | - (Senior) Add Multi-Format Support (Apache Tika)                         | |
+|   +---------------------------------------------------------------------------+ |
+|                                       |                                         |
+|                                       v                                         |
+|   +---------------------------------------------------------------------------+ |
+|   | Phase 3: Add Production-Grade Observability                               | |
+|   |---------------------------------------------------------------------------| |
+|   | - Integrate OpenTelemetry                                                 | |
+|   | - Add Custom Spans for Tracing (retrieve, augment, generate)              | |
+|   +---------------------------------------------------------------------------+ |
+|                                       |                                         |
+|                                       v                                         |
+|   +---------------------------------------------------------------------------+ |
+|   | Phase 4: Advanced Retrieval & Data Lifecycle                              | |
+|   |---------------------------------------------------------------------------| |
+|   | - (Senior) Implement Re-Ranking                                           | |
+|   | - Implement Document Deletion                                             | |
+|   +---------------------------------------------------------------------------+ |
+|                                                                                 |
++---------------------------------------------------------------------------------+
+```
+
 This document outlines the next steps to evolve this project from a retrieval service into a full-fledged, production-ready Retrieval-Augmented Generation (RAG) application.
 
 ---
