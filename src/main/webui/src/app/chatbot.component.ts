@@ -54,20 +54,27 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   constructor(private webSocketService: WebSocketService) {}
 
   ngOnInit(): void {
-    const wsUrl = 'ws://' + window.location.host + '/chatbot';
+    console.log('ChatbotComponent ngOnInit');
+    const wsUrl = 'ws://' + window.location.hostname + ':8082/caton/chatbot';
+    console.log('WebSocket URL:', wsUrl);
     this.socket$ = this.webSocketService.connect(wsUrl);
+    console.log('Subscribing to WebSocket');
     this.socket$.subscribe(
       (message) => {
+        console.log('Received message:', message);
         this.messages.push({ sender: 'Bot', content: message });
       },
-      (err) => console.error(err),
-      () => console.warn('Completed!')
+      (err) => console.error('WebSocket error:', err),
+      () => console.warn('WebSocket connection completed!')
     );
+    console.log('Subscription added');
   }
 
   sendMessage(): void {
+    console.log('sendMessage called');
     if (this.newMessage.trim() !== '') {
       this.messages.push({ sender: 'You', content: this.newMessage });
+      console.log('Sending message:', this.newMessage);
       this.webSocketService.sendMessage(this.newMessage);
       this.newMessage = '';
     }

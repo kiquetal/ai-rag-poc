@@ -8,6 +8,7 @@ export class WebSocketService {
   private socket$!: WebSocketSubject<any>;
 
   public connect(url: string): WebSocketSubject<any> {
+    console.log('Connecting to WebSocket at:', url);
     if (!this.socket$ || this.socket$.closed) {
       this.socket$ = webSocket(url);
     }
