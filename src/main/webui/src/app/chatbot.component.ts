@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { WebSocketService } from './websocket.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -51,7 +51,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   newMessage: string = '';
   private socket$!: WebSocketSubject<any>;
 
-  constructor(private webSocketService: WebSocketService) {}
+  constructor(private webSocketService: WebSocketService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     console.log('ChatbotComponent ngOnInit');
@@ -61,8 +61,13 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     console.log('Subscribing to WebSocket');
     this.socket$.subscribe((response: any)=>{
       console.log('Received response:', response);
-      if (response && response.message) {
-        this.messages.push({ sender: 'Bot', content: response.message });
+      if (response) {
+        // Parse the message if it's a string
+        const message = typeof response === 'string' ? JSON.parse(response) : response;
+        if (message && message.message) {
+          this.messages.push({ sender: 'Bot', content: message.message });
+          this.cdr.detectChanges();
+        }
       }
     });
     console.log('Subscription added');
@@ -72,6 +77,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     console.log('sendMessage called');
     if (this.newMessage.trim() !== '') {
       this.messages.push({ sender: 'You', content: this.newMessage });
+      this.cdr.detectChanges();
       console.log('Sending message:', this.newMessage);
       this.webSocketService.sendMessage(this.newMessage);
       this.newMessage = '';

@@ -27,13 +27,13 @@ public class ChatWebSocket {
     @OnOpen
     public String onOpen() throws Exception {
         LOGGER.info("New connection");
-        String initialMessage = chatbotService.chat("Hello, how can i help you");
+        String initialMessage = chatbotService.chat("dummy context", "Hello, how can i help you");
         return objectMapper.writeValueAsString(new ChatMessage(initialMessage));
     }
     @OnTextMessage
     public String onMessage(String message) throws Exception {
         LOGGER.info("Received message");
-        String responseMessage = chatbotService.chat(message);
+        String responseMessage = chatbotService.chat("dummy context", message);
         return objectMapper.writeValueAsString(new ChatMessage(responseMessage));
     }
 }
