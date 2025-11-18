@@ -59,14 +59,12 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     console.log('WebSocket URL:', wsUrl);
     this.socket$ = this.webSocketService.connect(wsUrl);
     console.log('Subscribing to WebSocket');
-    this.socket$.subscribe(
-      (message) => {
-        console.log('Received message:', message);
-        this.messages.push({ sender: 'Bot', content: message });
-      },
-      (err) => console.error('WebSocket error:', err),
-      () => console.warn('WebSocket connection completed!')
-    );
+    this.socket$.subscribe((message: any)=>{
+
+      console.log('Received message:', message);
+
+
+    })
     console.log('Subscription added');
   }
 
