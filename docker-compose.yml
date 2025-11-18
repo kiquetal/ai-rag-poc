@@ -40,16 +40,77 @@ services:
     networks:
       - rag-network
 
-  llm-granite:
-    build:
-      context: .
-      dockerfile: llm-service.Dockerfile
+  granite:
+    # Image Selection:
+    # Use 'quay.io/ramalama/ramalama:latest' for general auto-detection (best effort).
+    # Use 'quay.io/ramalama/cuda:latest' for NVIDIA specific optimization.
+    # Use 'quay.io/ramalama/rocm:latest' for AMD.
+    image: quay.io/ramalama/ramalama:latest
+    container_name: ramalama-granite-server
+    restart: unless-stopped
+
+
+    # Port Mapping: Map container port 8080 to host port 8080
     ports:
-      - "8001:8080" # The llama.cpp server will be available on port 8001 of your host
+      - "8080:8080"
+
+    # Volume Mounts:
+    # 1. Mount the models directory read-only (:ro) for security.
+    # 2. Mount local time for log consistency.
     volumes:
-      - llm-model-data:/models # Persists the downloaded model
-    networks:
-      - rag-network
+      - models:/mnt/models
+    # Environment Variables:
+    # These can be used by the entrypoint, but we will override the command
+    # to be explicit.
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+      # Force generic images to look for specific hardware (optional)
+      # - GGML_VK_VISIBLE_DEVICES=0
+
+    # Hardware Acceleration (Uncomment the block matching your hardware)
+
+    # --- Option A: NVIDIA GPU ---
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+    # --- Option B: Intel/AMD (Device Mapping) ---
+    # devices:
+    #   - /dev/dri:/dev/dri
+    #   - /dev/kfd:/dev/kfd  # For AMD specifically
+
+    # Security Context:
+    # Drop all capabilities and only add what is strictly necessary.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+    # The Execution Command:
+    # Explicitly invoking 'llama-server' bypasses the shell entrypoint logic
+    # to give us full declarative control over the inference parameters.
+    command: >
+      llama-server
+      --model /mnt/models/granite-3.3-8b-instruct-Q4_K_M.gguf
+      --alias granite-3.3-8b
+      --host 0.0.0.0
+      --port 8080
+      --ctx-size 8192
+      --n-gpu-layers 99
+      --parallel 2
+      --cont-batching
+      --log-disable
+
+    # Optional: Vector Database for RAG (Future Proofing)
+    # qdrant:
+    #   image: qdrant/qdrant
+    #   ports: ["6333:6333"]
+    #   networks: ["ramalama-net"]
 
 networks:
   rag-network:
