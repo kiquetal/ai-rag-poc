@@ -11,4 +11,3 @@ import { RouterLink } from '@angular/router';
   standalone: true
 })
 export class HomeComponent {}
-

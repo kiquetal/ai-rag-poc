@@ -5,7 +5,7 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
   providedIn: 'root'
 })
 export class WebSocketService {
-  private socket$: WebSocketSubject<any>;
+  private socket$!: WebSocketSubject<any>;
 
   public connect(url: string): WebSocketSubject<any> {
     if (!this.socket$ || this.socket$.closed) {
@@ -22,4 +22,3 @@ export class WebSocketService {
     this.socket$.complete();
   }
 }
-
