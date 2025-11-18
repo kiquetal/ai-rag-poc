@@ -30,7 +30,19 @@ services:
       timeout: 5s         # Wait 5 seconds for the check to respond
       retries: 30         # Try up to 30 times (5 minutes total)
       start_period: 10s   # Give the container 10 seconds to start up before checking
+  podman-ai-lab:
+    image: quay.io/podman-desktop/ai-lab:latest
+    ports:
+      - "8088:8080"
+      - "5000:5000"
+    volumes:
+      - ai-lab-data:/data
+    networks:
+      - rag-network
 
 networks:
   rag-network:
     driver: bridge
+
+volumes:
+  ai-lab-data:
