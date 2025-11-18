@@ -3,6 +3,7 @@ package me.cresterida;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.websockets.next.*;
 import io.vertx.ext.web.Session;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,20 +17,24 @@ public class ChatWebSocket {
     @Inject
     ChatbotService chatbotService;
 
+    @Inject
+    ObjectMapper objectMapper;
+
     private Logger LOGGER = Logger.getLogger(ChatWebSocket.class);
 
-
+    public record ChatMessage(String message) {}
 
     @OnOpen
-    public String onOpen()
-    {
+    public String onOpen() throws Exception {
         LOGGER.info("New connection");
-        return chatbotService.chat("Hello, how can i help you");
+        String initialMessage = chatbotService.chat("Hello, how can i help you");
+        return objectMapper.writeValueAsString(new ChatMessage(initialMessage));
     }
     @OnTextMessage
-    public String onMessage(String message) {
+    public String onMessage(String message) throws Exception {
         LOGGER.info("Received message");
-        return chatbotService.chat(message);
+        String responseMessage = chatbotService.chat(message);
+        return objectMapper.writeValueAsString(new ChatMessage(responseMessage));
     }
 }
 
