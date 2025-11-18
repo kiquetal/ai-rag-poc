@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { WebSocketService } from './websocket.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { WebSocketSubject } from 'rxjs/webSocket';
 
 @Component({
   selector: 'app-chatbot',
@@ -48,7 +49,7 @@ import { FormsModule } from '@angular/forms';
 export class ChatbotComponent implements OnInit, OnDestroy {
   messages: { sender: string, content: string }[] = [];
   newMessage: string = '';
-  private socket$;
+  private socket$!: WebSocketSubject<any>;
 
   constructor(private webSocketService: WebSocketService) {}
 
@@ -76,4 +77,3 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.webSocketService.close();
   }
 }
-
