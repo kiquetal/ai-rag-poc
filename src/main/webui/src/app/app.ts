@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { environment } from '../environments/environment';
-import { ChatbotComponent } from './chatbot.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [ChatbotComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
