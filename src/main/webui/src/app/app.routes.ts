@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 import { ChatbotComponent } from './chatbot.component';
+import { HomeComponent } from './home.component';
 
 export const routes: Routes = [
-    { path: 'chatbot', component: ChatbotComponent },
-    { path: '', redirectTo: '/chatbot', pathMatch: 'full' }
+    { path: '', component: HomeComponent },
+    { path: 'chatbot', component: ChatbotComponent }
 ];
-
