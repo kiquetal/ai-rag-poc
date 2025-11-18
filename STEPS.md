@@ -76,5 +76,106 @@ This setup provides a live-reloading experience for both the backend and fronten
 
 ### Environments
 
+
+
 *   **Development (Default)**: The `./mvnw quarkus:dev` command uses the default development profile. It connects to local services and is optimized for live reloading.
+
 *   **Production (`prod` profile)**: The configuration includes a `prod` profile (see `application.properties`) intended for packaged deployments. This profile is typically activated during a container build and is configured to connect to production services like an external Infinispan cluster, as seen in `docker-compose.yml`. For local development, you should not need to use this profile.
+
+
+
+## 5. Angular Environment Variables
+
+
+
+To manage different settings for development and production builds (e.g., API endpoints), you can use Angular's environment files.
+
+
+
+1.  **Create Environment Files**:
+
+    *   `src/main/webui/src/environments/environment.ts`: For development settings.
+
+        ```typescript
+
+        export const environment = {
+
+          production: false,
+
+          apiBaseUrl: 'http://localhost:8082'
+
+        };
+
+        ```
+
+    *   `src/main/webui/src/environments/environment.prod.ts`: For production settings.
+
+        ```typescript
+
+        export const environment = {
+
+          production: true,
+
+          apiBaseUrl: '' // Served from the same origin
+
+        };
+
+        ```
+
+
+
+2.  **Configure `angular.json`**:
+
+    Modify `src/main/webui/angular.json` to replace the environment file during production builds. Add the `fileReplacements` array to the `production` configuration:
+
+    ```json
+
+    "architect": {
+
+      "build": {
+
+        "configurations": {
+
+          "production": {
+
+            "fileReplacements": [
+
+              {
+
+                "replace": "src/environments/environment.ts",
+
+                "with": "src/environments/environment.prod.ts"
+
+              }
+
+            ]
+
+            // ... other settings
+
+          }
+
+        }
+
+      }
+
+    }
+
+    ```
+
+
+
+3.  **Use in Your Application**:
+
+    Import the `environment` object in your components or services:
+
+    ```typescript
+
+    import { environment } from '../environments/environment';
+
+
+
+    // ...
+
+    console.log('API URL:', environment.apiBaseUrl);
+
+    ```
