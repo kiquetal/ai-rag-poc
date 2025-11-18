@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Chat</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        #chat-container { width: 100%; max-width: 600px; border: 1px solid #ccc; padding: 10px; }
+        #messages { height: 400px; overflow-y: auto; border-bottom: 1px solid #ccc; margin-bottom: 10px; padding: 5px; }
+        #chat-form { display: flex; }
+        #message-input { flex-grow: 1; padding: 8px; }
+        .message { margin-bottom: 10px; }
+        .user-message { text-align: right; color: blue; }
+        .bot-message { text-align: left; color: green; }
+    </style>
+</head>
+<body>
+
+<div id="chat-container">
+    <h1>AI Chat</h1>
+    <div id="messages"></div>
+    <form id="chat-form">
+        <input type="text" id="message-input" placeholder="Ask a question..." autocomplete="off" required>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('message-input');
+    const messages = document.getElementById('messages');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const query = input.value.trim();
+        if (!query) return;
+
+        addMessage(query, 'user-message');
+        input.value = '';
+
+        // This function is for the standard, non-streaming endpoint
+        await handleNonStreamingRequest(query);
+
+        // Uncomment the line below and comment out the one above
+        // to use the streaming endpoint from your roadmap.
+        // handleStreamingRequest(query);
+    });
+
+    function addMessage(text, className) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${className}`;
+        messageDiv.textContent = text;
+        messages.appendChild(messageDiv);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    // --- Option 1: For a standard non-streaming endpoint ---
+    // Corresponds to a JAX-RS endpoint returning `String`
+    async function handleNonStreamingRequest(query) {
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: query
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const botResponse = await response.text();
+            addMessage(botResponse, 'bot-message');
+        } catch (error) {
+            console.error('Error fetching response:', error);
+            addMessage('Sorry, something went wrong.', 'bot-message');
+        }
+    }
+
+    // --- Option 2: For a streaming endpoint ---
+    // Corresponds to the "Senior Feature" JAX-RS endpoint returning `Multi<String>`
+    function handleStreamingRequest(query) {
+        // NOTE: The standard EventSource API only supports GET requests.
+        // Your streaming endpoint should be adapted to accept the query as a URL parameter.
+        // Example: `/chat/stream?query=your_question`
+        const eventSource = new EventSource(`/chat/stream?query=${encodeURIComponent(query)}`);
+
+        const botMessageDiv = document.createElement('div');
+        botMessageDiv.className = 'message bot-message';
+        messages.appendChild(botMessageDiv);
+
+        eventSource.onmessage = (event) => {
+            // Assuming the stream sends the final message as "[DONE]"
+            if (event.data === "[DONE]") {
+                eventSource.close();
+            } else {
+                botMessageDiv.textContent += event.data;
+                messages.scrollTop = messages.scrollHeight;
+            }
+        };
+
+        eventSource.onerror = (err) => {
+            console.error('EventSource failed:', err);
+            botMessageDiv.textContent += ' (Error connecting to stream)';
+            eventSource.close();
+        };
+    }
+</script>
+
+</body>
+</html>
