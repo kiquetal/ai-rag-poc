@@ -40,9 +40,21 @@ services:
     networks:
       - rag-network
 
+  llm-granite:
+    build:
+      context: .
+      dockerfile: llm-service.Dockerfile
+    ports:
+      - "8001:8080" # The llama.cpp server will be available on port 8001 of your host
+    volumes:
+      - llm-model-data:/models # Persists the downloaded model
+    networks:
+      - rag-network
+
 networks:
   rag-network:
     driver: bridge
 
 volumes:
   ai-lab-data:
+  llm-model-data: {}
