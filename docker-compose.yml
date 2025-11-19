@@ -73,7 +73,7 @@ services:
       # Source: [6, 15]
     command: >
       /usr/bin/llama-server
-      --model /mnt/models/granite-3.3-8b-instruct-Q4_K_M
+      --model /mnt/models/granite-3.3-8b-instruct-Q4_K_M.gguf
       --alias granite
       --ctx-size 2048
       --host 0.0.0.0
