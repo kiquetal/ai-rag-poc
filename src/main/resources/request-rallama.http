@@ -1,0 +1,26 @@
+###
+# curl http://localhost:8080/v1/chat/completions
+#  -H "Content-Type: application/json"
+#  -d '{
+#    "model": "granite-3.3-8b",
+#    "messages": [
+#      {
+#        "role": "user",
+#        "content": "hola"
+#      }
+#    ]
+#  }
+POST http://localhost:8080/v1/chat/completions
+Content-Type: application/json
+
+{
+  "model": "granite-3.3-8b",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hola"
+    }
+  ]
+}
+
+###
