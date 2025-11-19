@@ -18,11 +18,11 @@ Inferred project details (from `pom.xml`):
 What I added for quick testing
 
 - A minimal REST resource at `GET /hello` implemented in `src/main/java/me/cresterida/GreetingResource.java`.
-- `src/main/resources/application.properties` sets `quarkus.http.port=8081` so the app listens on port 8081 by default.
+- `src/main/resources/application.properties` sets `quarkus.http.port=8082` so the app listens on port 8082 by default.
 
 ## Exposed Resources
 
-The application exposes the following endpoints:
+The application exposes the following endpoints under the `/caton` root path:
 
 ### REST API
 
@@ -66,7 +66,7 @@ Run / build instructions
 
 The dev server will start and you can open:
 
-http://localhost:8081/hello
+http://localhost:8082/caton/hello
 
 - Build and run the JVM artifact:
 
@@ -95,16 +95,15 @@ Next steps (optional)
 - Add OpenAPI and Swagger UI for API exploration.
 - Add a JSON response DTO and example client code.
 
-## Base path and codename
+## Base path
 
-This project exposes all HTTP endpoints under a configurable root path. The current codename and base path are set in `src/main/resources/application.properties`:
+This project exposes all HTTP endpoints under a configurable root path. The current base path is set in `src/main/resources/application.properties`:
 
-- `project.codename=circe`
-- `quarkus.http.root-path=/circe`
+- `quarkus.http.root-path=/caton`
 
 With these settings, the test endpoint is available at:
 
-http://localhost:8081/circe/hello
+http://localhost:8082/caton/hello
 
 (If you change `quarkus.http.port` or `quarkus.http.root-path`, update the URL accordingly.)
 
@@ -112,5 +111,5 @@ http://localhost:8081/circe/hello
 
 `/hello` quickcheck
 
-- After starting the app, visit: http://localhost:8081/hello
+- After starting the app, visit: http://localhost:8082/caton/hello
 - Expected response: plain text `Hello from ai-rag-poc`
