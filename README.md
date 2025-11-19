@@ -20,6 +20,42 @@ What I added for quick testing
 - A minimal REST resource at `GET /hello` implemented in `src/main/java/me/cresterida/GreetingResource.java`.
 - `src/main/resources/application.properties` sets `quarkus.http.port=8081` so the app listens on port 8081 by default.
 
+## Exposed Resources
+
+The application exposes the following endpoints:
+
+### REST API
+
+- **`GET /hello`**: A simple endpoint to check if the application is running.
+- **`POST /documents`**: Ingests a document into the vector store.
+  - **Request body**: `{"title": "...", "text": "..."}`
+- **`GET /documents/count`**: Returns the number of documents in the vector store.
+- **`GET /documents/search?term=...`**: Searches for documents similar to the given term.
+
+### WebSocket
+
+- **`/chatbot`**: A WebSocket endpoint for real-time chat with the AI model.
+
+## Architecture Diagram
+
+```
++-----------------+      +----------------------+      +--------------------+
+|                 |      |                      |      |                    |
+|   Web Browser   |<---->|   Quarkus Backend    |<---->|   Embedding Model  |
+| (Angular UI)    |      | (Java + LangChain4j) |      | (e.g., BGE-small)  |
+|                 |      |                      |      |                    |
++-----------------+      +-----------+----------+      +--------------------+
+       ^                       |
+       |                       |
+       v                       v
++-----------------+      +----------------------+
+|                 |      |                      |
+|      User       |      |   Vector Store       |
+|                 |      |   (Infinispan)       |
+|                 |      |                      |
++-----------------+      +----------------------+
+```
+
 Run / build instructions
 
 - Development mode (recommended while developing):
