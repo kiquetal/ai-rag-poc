@@ -41,77 +41,46 @@ services:
       - rag-network
 
   granite:
-    # Image Selection:
-    # Use 'quay.io/ramalama/ramalama:latest' for general auto-detection (best effort).
-    # Use 'quay.io/ramalama/cuda:latest' for NVIDIA specific optimization.
-    # Use 'quay.io/ramalama/rocm:latest' for AMD.
     image: quay.io/ramalama/ramalama:latest
-    container_name: ramalama-granite-server
-    restart: unless-stopped
+    container_name: granite-cpu-server
 
-
-    # Port Mapping: Map container port 8080 to host port 8080
+    # Expose the API port (OpenAI compatible)
     ports:
       - "8080:8080"
 
-    # Volume Mounts:
-    # 1. Mount the models directory read-only (:ro) for security.
-    # 2. Mount local time for log consistency.
+    # Mount your local models folder to /mnt/models inside the container
     volumes:
-      - models:/mnt/models
-    # Environment Variables:
-    # These can be used by the entrypoint, but we will override the command
-    # to be explicit.
+      - ./models:/mnt/models:ro
+
     environment:
       - HOST=0.0.0.0
       - PORT=8080
-      # Force generic images to look for specific hardware (optional)
-      # - GGML_VK_VISIBLE_DEVICES=0
+      - LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib64:${LD_LIBRARY_PATH}
+      # Force CPU mode by hiding CUDA devices (optional but recommended for CPU-only)
+      - CUDA_VISIBLE_DEVICES=-1
 
-    # Hardware Acceleration (Uncomment the block matching your hardware)
+      # Volume Configuration:
+      # Mounts the host's RamaLama model store into the container.
+      # The ':ro' flag protects the model files from modification.
+      # Source: [14, 11]
 
-    # --- Option A: NVIDIA GPU ---
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
-
-    # --- Option B: Intel/AMD (Device Mapping) ---
-    # devices:
-    #   - /dev/dri:/dev/dri
-    #   - /dev/kfd:/dev/kfd  # For AMD specifically
-
-    # Security Context:
-    # Drop all capabilities and only add what is strictly necessary.
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges:true
-
-    # The Execution Command:
-    # Explicitly invoking 'llama-server' bypasses the shell entrypoint logic
-    # to give us full declarative control over the inference parameters.
+      # Command Override:
+      # Bypasses the default entrypoint script to run the server directly.
+      # Arguments are tuned for a standard CPU deployment.
+      # - '--model': Must match the path inside /mnt/models
+      # - '-ngl 0': Forces 0 GPU layers to prevent crashes on non-GPU hosts.
+      # - '--ctx-size': Context window size (2048 is a safe default for 8GB-16GB RAM)
+      # Source: [6, 15]
     command: >
-      llama-server
-      --model /mnt/models/granite-3.3-8b-instruct-Q4_K_M.gguf
-      --alias granite-3.3-8b
+      /usr/bin/llama-server
+      --model /mnt/models/granite-3.3-8b-instruct-Q4_K_M
+      --alias granite
+      --ctx-size 2048
       --host 0.0.0.0
       --port 8080
-      --ctx-size 8192
-      --n-gpu-layers 99
-      --parallel 2
-      --cont-batching
-      --log-disable
-
-    # Optional: Vector Database for RAG (Future Proofing)
-    # qdrant:
-    #   image: qdrant/qdrant
-    #   ports: ["6333:6333"]
-    #   networks: ["ramalama-net"]
-
+      --n-gpu-layers 0
+      --threads 4
+      --cache-reuse 256
 networks:
   rag-network:
     driver: bridge
