@@ -12,6 +12,7 @@ models
 .settings/
 bin/
 sounds
+whisper-models
 # IntelliJ
 .idea
 *.ipr
