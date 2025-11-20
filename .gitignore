@@ -19,6 +19,7 @@ whisper-models
 *.iml
 *.iws
 
+.quinoa
 # NetBeans
 nb-configuration.xml
 
