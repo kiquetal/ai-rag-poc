@@ -81,6 +81,23 @@ services:
       --n-gpu-layers 0
       --threads 8
       --cache-reuse 256
+      
+
+  whisper-server:
+    image: fedirz/faster-whisper-server:latest-cpu
+    # USE THIS IMAGE INSTEAD IF YOU HAVE AN NVIDIA GPU:
+    # image: fedirz/faster-whisper-server:latest-cuda
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist downloaded models so they aren't re-downloaded on restart
+      - ./whisper-models:/root/.cache/huggingface
+    environment:
+      # Model options: tiny, base, small, medium, large-v2, large-v3
+      # 'tiny' is instant but inaccurate. 'medium' is great for podcasts.
+      - WHISPER_MODEL=base
+      - LOG_LEVEL=info
+    restart: unless-stopped
 networks:
   rag-network:
     driver: bridge
