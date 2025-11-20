@@ -11,7 +11,7 @@ models
 .classpath
 .settings/
 bin/
-
+sounds
 # IntelliJ
 .idea
 *.ipr
