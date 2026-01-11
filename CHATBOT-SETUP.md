@@ -45,20 +45,20 @@ The chatbot currently supports **two LLM provider options**:
 ✅ **Currently Configured** - This is what your `application.properties` is using.
 
 ```properties
-quarkus.langchain4j.openai.base-url=http://localhost:46383/v1
+quarkus.langchain4j.openai.base-url=http://localhost:8080/v1
 quarkus.langchain4j.openai.timeout=80s
 quarkus.langchain4j.chat-model.provider=openai
 ```
 
 **How it works:**
 - Uses OpenAI-compatible API from your local Granite model server
-- The URL `http://localhost:46383/v1` should point to your local LLM server
+- The URL `http://localhost:8080/v1` points to your local LLM server
 - No API key required (or use a dummy value)
 - Runs completely offline
 
 **Check if it's running:**
 ```bash
-curl http://localhost:46383/v1/models
+curl http://localhost:8080/v1/models
 ```
 
 ### Option 2: Google Gemini (Cloud Service)
@@ -92,7 +92,7 @@ export GEMINI_PROJECT_ID="your-gcp-project-id"
 2. **Node.js** (v22.14.0 recommended) and **npm** (v10.9.2 recommended)
 3. **Infinispan** running (started automatically by Quarkus Dev Services)
 4. **LLM Provider** configured (choose one):
-   - Local Granite server running on port 46383, OR
+   - Local Granite server running on port 8080, OR
    - Gemini API credentials
 
 ### Step 1: Check Your LLM Provider
@@ -101,7 +101,7 @@ export GEMINI_PROJECT_ID="your-gcp-project-id"
 
 ```bash
 # Check if the local LLM server is running
-curl http://localhost:46383/v1/models
+curl http://localhost:8080/v1/models
 
 # If not running, start the Granite container from docker-compose:
 docker compose up -d granite
@@ -164,18 +164,21 @@ You should see the Angular application with the chatbot interface.
 
 ### Step 5: Test the WebSocket Connection
 
-The chatbot connects via WebSocket. You can test it manually:
+The chatbot connects via WebSocket. You can test it with the provided test script:
 
 ```bash
-# Install wscat if you don't have it
-npm install -g wscat
+# Use the Node.js test script (recommended)
+node test-websocket.js
 
-# Connect to the chatbot WebSocket
-wscat -c ws://localhost:8082/caton/chatbot
-
-# You should immediately receive a greeting message
-# Type a message and press Enter to chat
+# This will:
+# - Connect to the WebSocket
+# - Receive the initial greeting
+# - Send a test message
+# - Display the bot's response
 ```
+
+**Alternative: Test with browser**
+Simply open http://localhost:8082/caton in your browser and use the chat interface.
 
 ---
 
@@ -195,9 +198,9 @@ wscat -c ws://localhost:8082/caton/chatbot
 
 2. **Check WebSocket endpoint:**
    ```bash
-   wscat -c ws://localhost:8082/caton/chatbot
+   node test-websocket.js
    ```
-   Should immediately send a greeting message.
+   Should connect and receive a greeting message.
 
 3. **Check browser console** (F12 → Console tab):
    - Look for WebSocket connection errors
@@ -221,7 +224,7 @@ The chatbot should retrieve relevant context from the vector store before genera
 
 1. **For local LLM:**
    - Verify Granite server is running: `docker ps | grep granite`
-   - Check if port 46383 is correct: `docker port <granite-container-id>`
+   - Check if port 8080 is accessible: `curl http://localhost:8080/v1/models`
    - Increase timeout in `application.properties`:
      ```properties
      quarkus.langchain4j.openai.timeout=120s
@@ -251,7 +254,7 @@ The chatbot should retrieve relevant context from the vector store before genera
 3. **Test the LLM provider directly:**
    ```bash
    # For local LLM:
-   curl http://localhost:46383/v1/chat/completions \
+   curl http://localhost:8080/v1/chat/completions \
      -H "Content-Type: application/json" \
      -d '{
        "model": "granite",
@@ -520,7 +523,7 @@ public void onClose() {
 
 ### Quick Verification Checklist:
 
-- [ ] Local LLM server is running (port 46383)
+- [ ] Local LLM server is running (port 8080)
 - [ ] Infinispan is running (automatic in dev mode)
 - [ ] Frontend dependencies installed (`npm install`)
 - [ ] Application started (`./mvnw quarkus:dev`)

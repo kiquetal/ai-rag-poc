@@ -6,7 +6,7 @@
 
 Your chatbot is configured to use a **local LLM server** at:
 ```
-http://localhost:46383/v1
+http://localhost:8080/v1
 ```
 
 ## Status Check Results
@@ -17,7 +17,7 @@ http://localhost:46383/v1
 - **Quarkus Dev**: Should be running on port 8082
 
 ### ❌ What's Missing:
-- **Granite LLM Server**: NOT running on port 46383
+- **Granite LLM Server**: NOT running on port 8080
   - The chatbot **will NOT work** until this is started
 
 ## How to Fix
@@ -29,7 +29,7 @@ http://localhost:46383/v1
 docker compose up -d granite
 
 # Wait a few seconds, then verify it's running
-curl http://localhost:46383/v1/models
+curl http://localhost:8080/v1/models
 
 # You should see a JSON response listing available models
 ```
@@ -37,11 +37,10 @@ curl http://localhost:46383/v1/models
 ### Option 2: Check if Granite is on a Different Port
 
 ```bash
-# Check if llama-server or granite is running on port 8080
+# Verify Granite is running on the correct port (8080)
 curl http://localhost:8080/v1/models
 
-# If this works, update application.properties:
-# Change: quarkus.langchain4j.openai.base-url=http://localhost:8080/v1
+# If this works, you're all set!
 ```
 
 ### Option 3: Use Gemini Instead (Cloud-Based)
@@ -73,7 +72,7 @@ If you don't want to run a local LLM:
 curl http://localhost:8082/caton/hello
 
 # 2. Check if LLM server is running  
-curl http://localhost:46383/v1/models
+curl http://localhost:8080/v1/models
 
 # 3. Check if Infinispan is accessible
 INFINISPAN_PORT=$(docker port $(docker ps -q --filter "ancestor=quay.io/infinispan/server:15.0") 11222 | cut -d: -f2)
@@ -102,7 +101,7 @@ docker compose up -d granite
 
 Then verify:
 ```bash
-curl http://localhost:46383/v1/models
+curl http://localhost:8080/v1/models
 ```
 
 Expected output:
