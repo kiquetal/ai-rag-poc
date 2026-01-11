@@ -1,5 +1,5 @@
 curl http://localhost:8181/v1/audio/transcriptions \
-  -F "file=@../../../sounds/zeno.mp3" \
+  -F "file=@../../../sounds/crazy-horse.mp3" \
   -F "model=whisper-1" \
   -F "response_format=text" \
-  > transcription-zeno.txt
+  > transcription-crazy-horse.txt

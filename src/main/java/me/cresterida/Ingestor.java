@@ -36,6 +36,7 @@ public class Ingestor {
 
     @Inject
     RemoteCacheManager remoteCacheManager; // Inject the main cache manager
+
     public void ingest(String title, String text) {
         String docId = UUID.randomUUID().toString();
         Metadata metadata = Metadata.from("document_id", docId);
