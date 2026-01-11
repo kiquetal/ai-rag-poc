@@ -75,12 +75,16 @@ services:
       /usr/bin/llama-server
       --model /mnt/models/granite-3.3-8b-instruct-Q4_K_M.gguf
       --alias granite
-      --ctx-size 2048
+      --ctx-size 512
       --host 0.0.0.0
       --port 8080
       --n-gpu-layers 0
-      --threads 8
+      --threads 12
+      --threads-batch 12
       --cache-reuse 256
+      --n-predict 150
+      --batch-size 512
+      --parallel 1
       
 
   whisper-server:
